@@ -1,0 +1,22 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<div>@helloWorld</div>
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+@inject ApiClient Http
+@code {
+    private string helloWorld = string.Empty;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        this.helloWorld = await this.Http.GetStringAsync("api/HelloWorld");
+    }
+}

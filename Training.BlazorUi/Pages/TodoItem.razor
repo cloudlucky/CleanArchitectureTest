@@ -1,0 +1,62 @@
+﻿@page "/todo-items/{id:guid}"
+<h3>TodoItem</h3>
+
+<EditForm Model="Dto" OnValidSubmit="HandleValidSubmit">
+    <label>
+        Text
+        <InputText @bind-Value="Dto.Text" />
+    </label>
+
+    <label>
+        IsCompleted
+        <InputCheckbox @bind-Value="Dto.IsCompleted" />
+    </label>
+
+    <button class="btn btn-primary" type="submit">Save</button>
+</EditForm>
+
+@inject ApiClient ApiClient
+@inject NavigationManager NavigationManager
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private TodoItemDto Dto = new TodoItemDto();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        if (this.Id != Guid.Empty)
+        {
+            var result = (await this.ApiClient.GetFromJsonAsync<ViewModel>($"api/TodoItems/{this.Id}"))!;
+            this.Dto = result.Dto;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (this.Id == Guid.Empty)
+        {
+            await this.ApiClient.PostAsJsonAsync("api/TodoItems", this.Dto);
+        }
+        else
+        {
+            await this.ApiClient.PutAsJsonAsync($"api/TodoItems/{this.Id}", this.Dto);
+        }
+        
+        this.NavigationManager.NavigateTo("todo-items");
+    }
+
+    public class ViewModel
+    {
+        public TodoItemDto Dto { get; set; } = default!;
+    }
+
+    public class TodoItemDto
+    {
+        public string Text { get; set; } = default!;
+
+        public bool IsCompleted { get; set; }
+    }
+}

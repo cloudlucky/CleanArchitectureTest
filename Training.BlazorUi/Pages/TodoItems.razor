@@ -1,0 +1,44 @@
+﻿@page "/todo-items"
+<h3>TodoItems</h3>
+
+<a href="todo-items/@Guid.Empty" class="btn btn-primary">Add</a>
+
+@if (viewModel is null)
+{
+    <text>Loading...........</text>
+}
+else
+{
+    foreach (var item in viewModel.Items)
+    {
+        <div>
+            <a href="todo-items/@item.Id">@item.Text</a>
+        </div>
+    }
+}
+
+@inject ApiClient ApiClient
+@code {
+    private TodoItemViewModel? viewModel;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        this.viewModel = await this.ApiClient.GetFromJsonAsync<TodoItemViewModel>("api/TodoItems");
+    }
+
+    public class TodoItemViewModel
+    {
+        public IEnumerable<TodoItemDto> Items { get; set; } = new List<TodoItemDto>(0);
+    }
+
+    public class TodoItemDto
+    {
+        public Guid Id { get; set; }
+
+        public string Text { get; set; } = default!;
+
+        public bool IsCompleted { get; set; }
+    }
+}
